@@ -1,0 +1,177 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+/* Large screens with motion allowed: the dish showcase pins and is driven by scroll. */
+@custom-variant scrolly (@media (min-width: 1024px) and (min-height: 620px) and (prefers-reduced-motion: no-preference));
+
+/*
+ * Sorrel visual system
+ * Warm bone paper, ink type, one ember accent. Dish photography supplies the
+ * colour; the interface stays quiet around it.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-fraunces);
+  --font-heading: var(--font-fraunces);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bone: var(--bone);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-moss: var(--moss);
+  --color-moss-ink: var(--moss-ink);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --animate-plate-spin: plate-spin 90s linear infinite;
+  --animate-ring-spin: plate-spin 60s linear infinite;
+}
+
+@keyframes plate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:root {
+  --bone: #f1ebe0;
+  --paper: #faf7f1;
+  --ink: #1d1c19;
+  --ink-soft: #5d584f;
+  --line: rgb(29 28 25 / 0.12);
+  --brand: #c4532d;
+  --moss: #26352a;
+  --moss-ink: #e9e4d6;
+
+  --background: var(--bone);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #faf7f1;
+  --secondary: #e7dfd1;
+  --secondary-foreground: var(--ink);
+  --muted: #e9e2d5;
+  --muted-foreground: var(--ink-soft);
+  --accent: #e7dfd1;
+  --accent-foreground: var(--ink);
+  --destructive: #b3321f;
+  --border: rgb(29 28 25 / 0.14);
+  --input: rgb(29 28 25 / 0.2);
+  --ring: rgb(29 28 25 / 0.45);
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 30%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+    font-variation-settings: "SOFT" 60, "WONK" 0;
+    font-optical-sizing: auto;
+  }
+  .font-display-wonk {
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .eyebrow {
+    @apply text-[0.6875rem] font-semibold tracking-[0.18em] uppercase;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* A plate photo shown as a cut-out: circular crop, soft contact shadow. */
+  .plate {
+    border-radius: 9999px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.12),
+      0 18px 40px -12px rgb(40 24 10 / 0.35),
+      0 40px 80px -30px rgb(40 24 10 / 0.3);
+  }
+  .plate > img {
+    transform: scale(1.025);
+  }
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.3 0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
