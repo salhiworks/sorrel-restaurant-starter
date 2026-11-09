@@ -82,32 +82,37 @@ Once Supabase is connected (step 4), most of this content is edited from the das
 
 ## Step 4: Connect Supabase (Production Mode)
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. In **SQL Editor**, paste and run the whole of `supabase/migrations/0001_init.sql`. This creates the tables, security rules (Row Level Security), access grants and the `dish-images` storage bucket. It is safe to run again.
-3. In **Authentication → Sign In / Providers**, turn off **Allow new users to sign up** (you create staff accounts yourself), and under **Email** turn on **Prevent use of leaked passwords** if your plan offers it. Then in **Authentication → Users**, click **Add user** and create the owner's account (email and a strong password of at least 10 characters).
-4. Make that user an admin. In **SQL Editor** run (with your email):
+Claude does the technical setup with the Supabase CLI pinned in this project (`npx supabase`, no global install, no Docker). Full details: [docs/SETUP.md](docs/SETUP.md).
 
-   ```sql
-   insert into public.admins (user_id)
-   select id from auth.users where email = 'owner@example.com';
+1. Create a new, empty project at [supabase.com](https://supabase.com) (the free plan works) and copy its **Project ID** from **Project Settings → General**.
+2. Open this folder in Claude Desktop's **Code** tab and ask Claude to connect Supabase with that Project ID, following `docs/SETUP.md`. Claude links the project and asks you to confirm its name, checks the migration history, shows a dry run and applies `supabase/migrations`: the tables, security rules (Row Level Security), the order function and the `dish-images` storage bucket.
+3. When Claude asks, run these two yourself in your own terminal, because they need your browser or a password:
+
+   ```bash
+   npx supabase login    # once; opens your browser
+   npm run setup         # creates your owner account in a hidden prompt
    ```
 
-5. In Hostinger, open your Node.js app's **Environment variables** and add (values from Supabase → **Connect**, or **Project Settings → API Keys**):
+   `npm run setup` skips what's already done, creates your owner account (email and a password of at least 10 characters, never saved), checks that public sign-ups are off, and prints the values for Hostinger. `npm run setup -- --check` only reports and changes nothing.
+
+4. In Hostinger, open your Node.js app's **Environment variables** and add:
 
    | Variable | Value |
    |---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | your Project URL |
-   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | the publishable key (`sb_publishable_…`) |
-   | `SUPABASE_SECRET_KEY` | the secret key (`sb_secret_…`). Server only; never share it or put it in code |
+   | `NEXT_PUBLIC_SUPABASE_URL` | your Project URL (`npm run setup` prints it) |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | the publishable key (`sb_publishable_…`; printed too) |
+   | `SUPABASE_SECRET_KEY` | the secret key (`sb_secret_…`), copied from Supabase → **Project Settings → API Keys**. Server only; never share it or put it in code |
    | `TRUSTED_PROXY` | `hostinger` (see [Order rate limiting behind a proxy](#order-rate-limiting-behind-a-proxy)) |
    | `NEXT_PUBLIC_SITE_URL` | your domain, e.g. `https://harbourkitchen.ie` |
    | `ORDER_IP_SALT` | optional: any long random string |
 
-6. **Redeploy** (rebuild). Public values are built into the site, so rebuild after changing any of them.
-   - *"Could not load the menu from Supabase"*: a key is wrong or step 2 wasn't run. The site never falls back to sample data in Production Mode.
+5. **Redeploy** (rebuild). Public values are built into the site, so rebuild after changing any of them.
+   - *"Could not load the menu from Supabase"*: a key is wrong or the database step didn't finish (`npm run setup -- --check` tells you). The site never falls back to sample data in Production Mode.
    - *"Environment variables need fixing"*: only one of the two public Supabase values is set (which would otherwise quietly build the demo site), or a secret key was given a `NEXT_PUBLIC_` name.
-7. Go to `/admin`, sign in, and click **Import sample menu**, or start from an empty menu.
-8. While signed in, open `/admin/connection-check`. `address` should match what a "what is my IP" website shows for your connection (check from your phone on mobile data too). If it can't be established, see [Order rate limiting behind a proxy](#order-rate-limiting-behind-a-proxy).
+6. Go to `/admin`, sign in, and click **Import sample menu**, or start from an empty menu.
+7. While signed in, open `/admin/connection-check`. `address` should match what a "what is my IP" website shows for your connection (check from your phone on mobile data too). If it can't be established, see [Order rate limiting behind a proxy](#order-rate-limiting-behind-a-proxy).
+
+No CLI? [docs/SETUP.md](docs/SETUP.md#without-the-cli-fallback) has the same setup by hand in the SQL Editor.
 
 ## Step 5: Configure your restaurant and launch
 
@@ -186,6 +191,7 @@ You don't need it for your own restaurant.
 npm run dev        # development server
 npm run build      # production build
 npm run start      # serve the production build
+npm run setup      # connect Supabase: database, owner account, values for Hostinger (docs/SETUP.md)
 npm run lint
 npm run typecheck
 npm test           # unit tests (no database needed)
